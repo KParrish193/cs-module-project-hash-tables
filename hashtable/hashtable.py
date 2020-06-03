@@ -7,10 +7,29 @@ class HashTableEntry:
         self.value = value
         self.next = None
 
+    def __repr__(self):
+        return f"HashTableEntry({repr(self.key)}, {repr(self.value)})"
+
 
 # Hash table can't have fewer than this many slots
 MIN_CAPACITY = 8
 
+class SLL:
+    def __init__(self, node=None):
+        self.head = None
+        self.tail = None
+
+    def add_to_tail(self, key, value):
+        new_node = HashTableEntry(key, value)
+
+        # there's nothing in linked list
+        if not self.head:
+            self.head = new_node
+            self.tail = new_node
+
+        else:
+            self.tail.next = new_node
+            self.tail = new_node
 
 class HashTable:
     """
@@ -21,7 +40,9 @@ class HashTable:
     """
 
     def __init__(self, capacity):
-        # Your code here
+        self.capacity = capacity
+        self.storage = [None] * self.capacity
+        self.itemCount = 0
 
 
     def get_num_slots(self):
@@ -34,7 +55,8 @@ class HashTable:
 
         Implement this.
         """
-        # Your code here
+        
+        return len(self.storage)
 
 
     def get_load_factor(self):
@@ -43,8 +65,23 @@ class HashTable:
 
         Implement this.
         """
-        # Your code here
+        # ? load factor is the number of slots filled divided by capacity
 
+        # total = 0
+
+        # for i in range(len(self.storage)):
+        #     if self.storage[i] != None:
+
+        #         current = self.storage[i].head
+
+        #         while current.next is not None:
+        #             total += 1
+                    
+        #             current = current.next
+
+        #         total += 1
+
+        return self.itemCount / self.get_num_slots()
 
     def fnv1(self, key):
         """
@@ -62,7 +99,15 @@ class HashTable:
 
         Implement this, and/or FNV-1.
         """
-        # Your code here
+        bytes_obj = str(key).encode("utf-8")
+        djb2_val = 5381
+        total_val = 0
+
+        for char in bytes_obj:
+            total_val += ((djb2_val << 5) + djb2_val) + char
+            total_val &= 0xffffffff
+
+        return total_val
 
 
     def hash_index(self, key):
@@ -82,6 +127,31 @@ class HashTable:
         Implement this.
         """
         # Your code here
+        index = self.hash_index(key)
+
+        # check if key is already in storage
+        if self.storage[index] != None:
+
+            # if key is already in storage, overwrite current value
+            current = self.storage[index].head
+
+            while current.next is not None:
+                if current.key == key:
+                    # overwrite the value
+                    current.value = value
+
+                current = current.next
+
+            if current.key == key:
+                current.value = value
+            else:
+                self.storage[index].add_to_tail(key, value)
+
+        else:
+            # if key is not in storage, create a new linked list passing in the key and value as the value
+            self.storage[index] = SLL()
+            self.itemCount += 1
+            self.storage[index].add_to_tail(key, value)
 
 
     def delete(self, key):
@@ -93,6 +163,30 @@ class HashTable:
         Implement this.
         """
         # Your code here
+        index = self.hash_index(key)
+
+        # ? self.storage[index] is a node with tuple as a value
+        # ? if self.storage[index].key is not equal to the key, traverse the linked list
+
+        if self.storage[index].head.key == key:
+            self.storage[index].head.value = None
+
+        else:
+            current = self.storage[index].head
+
+            while current.next is not None:
+                if current.key == key:
+                    current.value = None
+                    self.itemCount -= 1
+
+                current = current.next
+
+            # ? current.next is now None, the last current will be the tail
+            if current.key == key:
+                current.value = None
+
+            else:
+                return "Key not found"
 
 
     def get(self, key):
@@ -105,6 +199,30 @@ class HashTable:
         """
         # Your code here
 
+        # ? if self.storage[index].key == key, return the value
+        # ? if self.storage[index].key is not the key, traverse the linked list
+        # ? if not found return None
+
+        index = self.hash_index(key)
+
+        if self.storage[index].head.key == key:
+            return self.storage[index].head.value
+
+        else:
+
+            current = self.storage[index].head
+
+            while current.next is not None:
+                if current.key == key:
+                    return current.value
+
+                current = current.next
+
+            if current.key == key:
+                return current.value
+
+            else:
+                return None
 
     def resize(self, new_capacity):
         """
@@ -115,6 +233,32 @@ class HashTable:
         """
         # Your code here
 
+        # ? create a copy of the old storage
+        storage_copy = self.storage
+        # ? change value of capacity
+        self.capacity = new_capacity
+        # ? change value of storage
+        self.storage = [None] * self.capacity
+
+        prevItemCount = self.itemCount
+
+        # ? loop through items of the array
+        # ? if item.next is None, move to next index
+        for i in range(len(storage_copy)):
+            # ? each item is a linked list
+            if storage_copy[i] != None:
+
+                # ? traverse the linked list and rehash each item
+                current = storage_copy[i].head
+
+                while current.next is not None:
+                    self.put(current.key, current.value)
+                    current = current.next
+
+                # ? current value will now be the tail
+                self.put(current.key, current.value)
+        
+        self.itemCount = prevItemCount
 
 
 if __name__ == "__main__":
