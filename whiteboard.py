@@ -43,3 +43,31 @@ for i in array:
 # twelve
 # You may use whatever programming language you wish.
 # Verbalize your thought process as much as possible before writing any code. Run through the UPER problem solving framework while going through your thought process.
+
+
+
+
+# Add up and print the sum of the all of the minimum elements of each inner array:
+# [[8, 4], [90, -1, 3], [9, 62], [-7, -1, -56, -6], [201], [76, 18]]
+# The expected output is given by:
+# 4 + -1 + 9 + -56 + 201 + 18 = 175
+# You may use whatever programming language you'd like.
+# Verbalize your thought process as much as possible before writing any code. Run through the UPER problem solving framework while going through your thought process.
+
+given = [[8, 4], [90, -1, 3], [9, 62], [-7, -1, -56, -6], [201], [76, 18]]
+
+def mini_sum_array(given):
+    # ? miniSum = 0
+    sumList = []
+
+    for i in given:
+        # find the minimum for each element in given
+        # ? miniSum += min(i)
+        sumList.append(min(i))
+
+        # add together results from minimums
+
+    # return the sum
+    return sum(sumList)
+
+print(mini_sum_array(given))
